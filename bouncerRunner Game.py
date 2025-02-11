@@ -14,6 +14,11 @@ PLATFORM_HEIGHT = 10
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
+LEVELS = 10
+
+def generate_platforms(level):
+    platform_count = max(5, 15 - level)  # Fewer platforms as levels increase
+    return [Platform(random.randint(0, WIDTH - PLATFORM_WIDTH), HEIGHT - i * 80) for i in range(platform_count)]
 
 # Setup screen
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -56,9 +61,9 @@ class Platform:
     def draw(self):
         pygame.draw.rect(screen, WHITE, (self.x, self.y, self.width, self.height))
 
-# Generate platforms
-platforms = [Platform(random.randint(0, WIDTH - PLATFORM_WIDTH), HEIGHT - i * 80) for i in range(10)]
 ball = Ball()
+current_level = 1
+platforms = generate_platforms(current_level)
 
 # Game loop
 running = True
@@ -80,6 +85,16 @@ while running:
         if platform.y < ball.y + BALL_RADIUS < platform.y + PLATFORM_HEIGHT and platform.x < ball.x < platform.x + PLATFORM_WIDTH:
             ball.jump()
     
+    # Level progression
+    if ball.y < 50:  # Reaching near top advances level
+        current_level += 1
+        if current_level > LEVELS:
+            print("You Win!")
+            running = False
+        else:
+            platforms = generate_platforms(current_level)
+            ball.reset()
+    
     # Draw everything
     for platform in platforms:
         platform.draw()
@@ -89,3 +104,4 @@ while running:
     clock.tick(60)
 
 pygame.quit()
+
